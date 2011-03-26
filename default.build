@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<project name="NAnt" default="run">
+
+    <property name="configuration" value="Debug" overwrite="false" readonly="false" />
+    
+    <property name="dir.build"          value="${path::combine('bin', configuration)}" overwrite="false" readonly="true" />
+    <property name="dir.build.content"  value="${path::combine(dir.build, 'Content')}" overwrite="false" readonly="true" />
+    <property name="dir.obj"            value="${path::combine('obj', configuration)}" overwrite="false" readonly="true" />
+    <property name="dir.obj.content"    value="${path::combine(dir.obj, 'Content')}" overwrite="false" readonly="true" />
+    <property name="dir.source" value="src" overwrite="false" readonly="true" />
+    
+    <property name="file.build.target" value="${path::combine(dir.build, 'XnaContentPipelineTasks.dll')}" overwrite="false" readonly="true" />
+    
+    <!-- Compile the test task and add it then use it. -->
+    <target name="clean">
+        <delete dir="${dir.build}" if="${directory::exists(dir.build)}" />
+    </target>
+    
+    <target name="build">
+        <mkdir dir="${dir.build}" unless="${directory::exists(dir.build)}" />
+                
+        <csc verbose="true" target="library" output="${file.build.target}">
+            <sources basedir="${dir.source}">
+                <include name="**/*.cs"/>
+            </sources>
+            <references>                
+                <include name="${nant::get-base-directory()}/NAnt.Core.dll"/>
+                <include name="Microsoft.Build.Engine.dll" />
+                <include name="Microsoft.Build.Framework.dll" />
+                <include name="Microsoft.Build.Utilities.dll" />
+            </references>
+        </csc>
+    </target>
+
+    <target name="run" depends="">
+        <mkdir dir="${dir.build.content}" unless="${directory::exists(dir.build.content)}" />
+        <mkdir dir="${dir.obj.content}" unless="${directory::exists(dir.obj.content)}" />
+        
+        <!-- Dynamically load the tasks in the Task assembly. -->
+        <loadtasks assembly="${file.build.target}" />
+
+        <!-- Call our new task, converts the message attribute to all caps and displays it. -->
+        <xnacontent basedir="Content" intermediatedir="${dir.obj.content}" outputdir="${dir.build.content}" targetplatform="Windows">
+            <assemblies>
+            </assemblies>
+
+            <assets basedir="Content/Models"
+                    importer="FbxImporter"
+                    processor="ModelProcessor">
+              <include name="*.fbx" />
+            </assets>
+
+            <assets basedir="Content/Textures"
+                    importer="TextureImporter"
+                    processor="TextureProcessor">
+              <include name="*.tga" />
+            </assets>
+        </xnacontent>
+    </target>
+
+</project>

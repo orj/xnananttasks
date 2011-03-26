@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<project name="Example" default="build">
+  
+  <target name="clean" description="remove all generated files">
+    <delete dir="bin" if="${directory::exists('bin')}" />
+    <delete dir="obj" if="${directory::exists('obj')}" />
+  </target>
+
+  <target name="build" description="compiles the source code">
+    <mkdir dir="bin" />
+    <mkdir dir="obj" />
+
+    <!-- Dynamically load the tasks in the Task assembly. -->
+    <loadtasks assembly="XnaContentPipelineTasks.dll" />
+
+    <xnacontent basedir="Content" intermediatedir="obj" outputdir="bin" targetplatform="Windows">
+      <assemblies>
+        <!-- fileset of additional custom importer/processor assemblies. -->        
+      </assemblies>
+      
+      <assets basedir="Content/Models" 
+              importer="FbxImporter" 
+              processor="ModelProcessor">
+        <include name="*.fbx" />
+      </assets>
+
+      <assets basedir="Content/Textures" 
+              importer="TextureImporter" 
+              processor="TextureProcessor">
+        <include name="*.tga" />
+      </assets>
+      
+    </xnacontent>
+  </target>
+
+</project>
